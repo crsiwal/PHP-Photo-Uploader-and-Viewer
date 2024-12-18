@@ -2,6 +2,11 @@
 // Include the database connection file
 require_once './Connection.php';  // Ensure you include the file where $mysqli is initialized
 
+// Enable CORS
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+
 // Set the Content-Type header for JSON response
 header('Content-Type: application/json');
 
@@ -50,6 +55,9 @@ if ($result->num_rows > 0) {
     // Send response indicating no images found
     echo json_encode([
         'success' => false,
+        'page' => $page,
+        'limit' => $limit,
+        'images' => [],
         'message' => 'No images found'
     ]);
 }
