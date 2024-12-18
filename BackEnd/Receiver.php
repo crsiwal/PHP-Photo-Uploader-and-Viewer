@@ -1,31 +1,35 @@
 <?php
 require './Connection.php'; // Include database connection
 $response = ["success" => false];
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
-    // Directory to save the resized image
-    $targetDirectory = 'uploads/' . date('YmdH') . "/";
 
-    // Ensure the directory exists
-    if (!is_dir($targetDirectory)) {
-        mkdir($targetDirectory, 0777, true);
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
+    // Directory to save resized images
+    $baseDirectory = 'uploads/' . date('YmdH') . "/";
+
+    // Ensure the base directory exists
+    if (!is_dir($baseDirectory)) {
+        mkdir($baseDirectory, 0777, true);
     }
 
     // Handle the uploaded file
     $image = $_FILES['image'];
     $fileName = basename($image['name']);
     $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION);
-    $newFileName = uniqid('photo_', true) . '.' . $fileExtension; // Unique file name
-    $targetFile = $targetDirectory . $newFileName;
+    $uniqueId = uniqid('photo_', true);
 
     // Check for upload errors
     if ($image['error'] !== UPLOAD_ERR_OK) {
         $response["message"] = "Error uploading the file.";
+        echo json_encode($response);
+        exit;
     }
 
     // Get the image info
     $imageInfo = getimagesize($image['tmp_name']);
     if ($imageInfo === false) {
         $response["message"] = "The file is not a valid image.";
+        echo json_encode($response);
+        exit;
     }
 
     $mimeType = $imageInfo['mime'];
@@ -43,56 +47,75 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
             break;
         default:
             $response["message"] = "Unsupported image type.";
+            echo json_encode($response);
+            exit;
     }
 
     // Get the original dimensions
     $originalWidth = $imageInfo[0];
     $originalHeight = $imageInfo[1];
 
-    // Calculate the new dimensions (512 pixels as the max width or height)
-    if ($originalWidth > $originalHeight) {
-        $newWidth = 512;
-        $newHeight = intval($originalHeight * (512 / $originalWidth));
-    } else {
-        $newHeight = 512;
-        $newWidth = intval($originalWidth * (512 / $originalHeight));
+    // Define sizes to create
+    $sizes = [100, 256, 512, 1024];
+    $savedPath = '';
+
+    foreach ($sizes as $size) {
+        // Calculate new dimensions
+        if ($originalWidth > $originalHeight) {
+            $newWidth = $size;
+            $newHeight = intval($originalHeight * ($size / $originalWidth));
+        } else {
+            $newHeight = $size;
+            $newWidth = intval($originalWidth * ($size / $originalHeight));
+        }
+
+        // Create a new blank image with the new dimensions
+        $resizedImage = imagecreatetruecolor($newWidth, $newHeight);
+
+        // Preserve transparency for PNG and GIF
+        if ($mimeType === 'image/png' || $mimeType === 'image/gif') {
+            imagealphablending($resizedImage, false);
+            imagesavealpha($resizedImage, true);
+        }
+
+        // Resize the image
+        imagecopyresampled($resizedImage, $srcImage, 0, 0, 0, 0, $newWidth, $newHeight, $originalWidth, $originalHeight);
+
+        // Subdirectory for the current size
+        $sizeDirectory = $baseDirectory . $size . '/';
+        if (!is_dir($sizeDirectory)) {
+            mkdir($sizeDirectory, 0777, true);
+        }
+
+        // Save the resized image
+        $targetFile = $sizeDirectory . $uniqueId . '.' . $fileExtension;
+        switch ($mimeType) {
+            case 'image/jpeg':
+                imagejpeg($resizedImage, $targetFile, 90);
+                break;
+            case 'image/png':
+                imagepng($resizedImage, $targetFile, 9);
+                break;
+            case 'image/gif':
+                imagegif($resizedImage, $targetFile);
+                break;
+        }
+
+        // Save the path for the 1024 size in the database
+        if ($size === 1024) {
+            $savedPath = $targetFile;
+        }
+
+        // Free memory for the resized image
+        imagedestroy($resizedImage);
     }
 
-    // Create a new blank image with the new dimensions
-    $resizedImage = imagecreatetruecolor($newWidth, $newHeight);
-
-    // Preserve transparency for PNG and GIF
-    if ($mimeType === 'image/png' || $mimeType === 'image/gif') {
-        imagealphablending($resizedImage, false);
-        imagesavealpha($resizedImage, true);
-    }
-
-    // Resize the image
-    imagecopyresampled($resizedImage, $srcImage, 0, 0, 0, 0, $newWidth, $newHeight, $originalWidth, $originalHeight);
-
-    // Save the resized image
-    switch ($mimeType) {
-        case 'image/jpeg':
-            imagejpeg($resizedImage, $targetFile, 90); // Save as JPEG with 90% quality
-            break;
-        case 'image/png':
-            imagepng($resizedImage, $targetFile, 9); // Save as PNG with max compression
-            break;
-        case 'image/gif':
-            imagegif($resizedImage, $targetFile); // Save as GIF
-            break;
-    }
-
-    // Free memory
-    imagedestroy($srcImage);
-    imagedestroy($resizedImage);
-
-    // Save the image details to the database
-    $name = $fileName; // Original file name
-    $path = $targetFile; // Local file path
+    // Save details to the database for the 1024 size
+    $name = $fileName;
+    $path = $savedPath;
     $order = getPhotoNextOrder();
-    $url = 'http://' . $_SERVER['HTTP_HOST'] . '/' . $targetFile; // Accessible URL
-    $createTime = date('Y-m-d H:i:s'); // Current timestamp
+    $url = 'http://' . $_SERVER['HTTP_HOST'] . '/' . $savedPath;
+    $createTime = date('Y-m-d H:i:s');
 
     $stmt = $mysqli->prepare("INSERT INTO photos (`name`, `order`, `path`, `url`, `create_time`) VALUES (?, ?, ?, ?, ?)");
     $stmt->bind_param("sisss", $name, $order, $path, $url, $createTime);
@@ -105,7 +128,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
     }
 
     $stmt->close();
+
+    // Free memory for the source image
+    imagedestroy($srcImage);
 } else {
     $response["message"] = 'No image file uploaded';
 }
+
 echo json_encode($response);
