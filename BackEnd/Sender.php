@@ -2,8 +2,9 @@
 include("./functions.php");
 
 // Directory with images
-$imageDirectory = 'D:\Upload\01'; // Replace with your directory path
-$receiverUrl = 'http://web6.adgyde.in/Receiver.php';
+$imageDirectory = 'D:\Upload\04'; // Replace with your directory path
+// $receiverUrl = 'http://web6.adgyde.in/Receiver.php'; // Development
+$receiverUrl = 'https://gaurav.gchat.in/services/Receiver.php'; // Live
 
 // Get all files in the directory
 $files = scandir($imageDirectory);
