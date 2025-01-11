@@ -22324,7 +22324,7 @@ code {
 
 /* Utilities */
 .grid-margin {
-  margin-bottom: 2.5rem;
+  margin-bottom: 1.5rem;
 }
 
 @media (min-width: 576px) {
@@ -22838,7 +22838,11 @@ code {
 
 .card-people {
   position: relative;
-  padding-top: 20px;
+  min-height: 200px;
+  background: #fff;
+  transition: all 300ms;
+  border-radius: 20px;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset;
 }
 .card-people img {
   border-radius: 20px;

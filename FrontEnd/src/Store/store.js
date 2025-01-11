@@ -1,8 +1,12 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { searchSlice } from "./Slices/searchSlice";
+import authReducer from "./features/auth/authSlice";
+import searchReducer from "./features/search/searchSlice";
+import layoutReducer from "./features/layout/layout";
 
 export default configureStore({
   reducer: {
-    search: searchSlice,
+    auth: authReducer,
+    search: searchReducer,
+    layout: layoutReducer,
   },
 });

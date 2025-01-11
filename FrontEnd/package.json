@@ -6,6 +6,7 @@
     "@reduxjs/toolkit": "^2.5.0",
     "axios": "^1.7.9",
     "bootstrap": "^5.3.3",
+    "flatlist-react": "^1.5.14",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-lazy-load-image-component": "^1.6.3",

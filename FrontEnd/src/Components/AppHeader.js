@@ -1,24 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import store from "../store/store";
 import { NavLink, useLocation } from "react-router-dom";
 import { loginAuth } from "../store/features/auth/authSlice";
-import { setRecord, setTyping } from "../store/features/search/searchSlice";
 import logo from "../assets/images/logo.svg";
+import store from "../store/store";
 import logo_mini from "../assets/images/logo-mini.svg";
 import defaultProfilePicture from "../assets/images/faces/face23.jpg";
-import { toggleSidebar } from "../store/features/layout/layout";
 
 const AppHeader = () => {
   const location = useLocation();
-  const dispatch = useDispatch();
-
   const [showMenuOption, setShowMenuOption] = useState(false);
   const [profilePicture, setProfilePicture] = useState(defaultProfilePicture);
-  const [typingTimeout, setTypingTimeout] = useState(null);
-
-  const searchText = useSelector(state => state.search.text);
-  const searchEnabled = useSelector(state => state.search.enabled);
 
   useEffect(() => {
     setShowMenuOption(false);
@@ -36,27 +27,6 @@ const AppHeader = () => {
     setShowMenuOption(prevValue => !prevValue);
   };
 
-  const handleInputText = e => {
-    dispatch(setRecord(e.target.value));
-    dispatch(setTyping(true));
-
-    // Clear the previous timeout if the user is still typing
-    if (typingTimeout) {
-      clearTimeout(typingTimeout);
-    }
-
-    // Set a new timeout to detect when user stops typing
-    const newTimeout = setTimeout(() => {
-      dispatch(setTyping(false));
-    }, 800); // Wait 800ms before considering the user stopped typing
-
-    setTypingTimeout(newTimeout);
-  };
-
-  const toggleSidebarMenu = () => {
-    dispatch(toggleSidebar());
-  };
-
   return (
     <nav className="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
       <div className="text-center navbar-brand-wrapper d-flex align-items-center justify-content-center">
@@ -68,25 +38,6 @@ const AppHeader = () => {
         </NavLink>
       </div>
       <div className="navbar-menu-wrapper d-flex align-items-center justify-content-end">
-        <button className="navbar-toggler navbar-toggler align-self-center" type="button" data-toggle="minimize" onClick={toggleSidebarMenu}>
-          <span className="icon-menu"></span>
-        </button>
-        {searchEnabled ? (
-          <ul className="navbar-nav mr-lg-2">
-            <li className="nav-item nav-search d-none d-lg-block">
-              <div className="input-group">
-                <div className="input-group-prepend hover-cursor" id="navbar-search-icon">
-                  <span className="input-group-text" id="search">
-                    <i className="icon-search"></i>
-                  </span>
-                </div>
-                <input type="text" className="form-control" id="navbar-search-input" placeholder="Search now" value={searchText} onChange={e => handleInputText(e)} aria-label="search" aria-describedby="search" />
-              </div>
-            </li>
-          </ul>
-        ) : (
-          ""
-        )}
         <ul className="navbar-nav navbar-nav-right">
           <li className="nav-item nav-profile dropdown">
             <div className="nav-link dropdown-toggle" data-toggle="dropdown" id="profileDropdown" onClick={() => toggleCollapse()}>
@@ -103,9 +54,6 @@ const AppHeader = () => {
             </div>
           </li>
         </ul>
-        <button className="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-toggle="offcanvas" onClick={toggleSidebarMenu}>
-          <span className="icon-menu"></span>
-        </button>
       </div>
     </nav>
   );

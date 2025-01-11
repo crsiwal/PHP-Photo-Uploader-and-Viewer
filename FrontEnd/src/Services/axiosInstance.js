@@ -21,14 +21,14 @@ axiosInstance.interceptors.request.use(
 
     if (userAuth.isAuthenticated) {
       // Attach token to headers if available
-      if (userAuth.token) {
+      /* if (userAuth.token) {
         config.headers.Authorization = `Bearer ${userAuth.token}`;
       }
 
       // Attach logged in User ID to headers if available
       if (userAuth.uid) {
         config.headers.uid = userAuth.uid;
-      }
+      } */
     }
     return config;
   },
