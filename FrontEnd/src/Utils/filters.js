@@ -5,6 +5,13 @@ export const setFilter = (filter = {}) => {
     page: filter.page || 1,
     sort: filter.sort || "desc",
   };
+
+  Object.keys(filter).forEach(key => {
+    if (!["limit", "page", "sort"].includes(key)) {
+      filters[key] = filter[key];
+    }
+  });
+
   return filters;
 };
 

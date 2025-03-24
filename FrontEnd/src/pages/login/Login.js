@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Navigate } from "react-router-dom";
-import { validateEmail } from "../../helpers/emailValidator";
 import { login } from "../../store/features/auth/authSlice";
 
 /* Load Assets */
@@ -10,8 +9,7 @@ import LoggedOutLayout from "../../layout/LoggedOutLayout";
 
 const Login = () => {
   const dispatch = useDispatch();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -37,19 +35,9 @@ const Login = () => {
     setLoading(true);
     setError("");
     try {
-      if (email === "") throw new Error("Email address should not be blank");
-      if (!validateEmail(email)) throw new Error("Email address should be valid");
-      if (password === "") throw new Error("Password can not be blank");
+      if (name === "") throw new Error("Please enter your name first.");
 
-      const response = {
-        "id": "67037bcd1b74134e59fd6ed4",
-        "name": "Testnd",
-        "email": "test@tes.com",
-        "phone": "9876543219",
-        "picture": "http://localhost:8000/2024/10/10/1728556965283.jpg",
-        "token": "eyJhbGciOiJIUzI1NiIsInR",
-        "permissions": ["VIEW_HOME"]
-      };
+      const response = { "id": "67037bcd1b74134e59fd6ed4", "name": name, "email": "test@tes.com", "phone": "9876543219", "picture": "", "token": "eyJhbGciOiJIUzI1NiIsInR", "permissions": ["VIEW_HOME"] };
       if (response.id) {
         dispatch(login(response));
       }
@@ -71,29 +59,16 @@ const Login = () => {
                   <img src={logo} alt="logo" />
                 </div>
                 <h4>Hello! let's get started</h4>
-                <h6 className="font-weight-light">Sign in to continue.</h6>
+                <h6 className="font-weight-light">Enter your name to continue.</h6>
                 <form className="pt-3">
                   <div className="form-group">
-                    <input type="email" className="form-control form-control-lg" id="exampleInputEmail1" placeholder="Username" value={email} onChange={e => setEmail(e.target.value)} required />
-                  </div>
-                  <div className="form-group">
-                    <input type="password" className="form-control form-control-lg" id="exampleInputPassword1" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required />
+                    <input type="text" className="form-control form-control-lg" placeholder="Enter your name" value={name} onChange={e => setName(e.target.value)} required />
                   </div>
                   {error && <p className="text-danger">{error}</p>}
                   <div className="mt-3">
                     <button onClick={handleLogin} type="button" disabled={loading} className="btn btn-block btn-primary btn-lg font-weight-medium auth-form-btn">
-                      SIGN IN
+                      Go to Photos
                     </button>
-                  </div>
-                  <div className="my-2 d-flex justify-content-between align-items-center">
-                    <div className="form-check">
-                      <label className="form-check-label text-muted">
-                        <input type="checkbox" className="form-check-input" />
-                        Keep me signed in
-                        <i className="input-helper"></i>
-                      </label>
-                    </div>
-                    <div className="auth-link text-black">Forgot password?</div>
                   </div>
                 </form>
               </div>

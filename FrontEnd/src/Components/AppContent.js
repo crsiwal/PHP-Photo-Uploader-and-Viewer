@@ -20,6 +20,7 @@ const AppContent = () => {
             if (route.permission && Array.isArray(permission) && permission.includes(route.permission)) {
               return route.element && <Route key={idx} path={route.path} exact={route.exact} name={route.name} element={<route.element />}></Route>;
             }
+            return false;
           })}
           <Route path="*" element={<Error404 />} />
         </Routes>

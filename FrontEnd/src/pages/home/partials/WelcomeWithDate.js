@@ -10,7 +10,7 @@ const WelcomeWithDate = () => {
           <div className="col-12 col-xl-8">
             <h3 className="font-weight-bold">Welcome {auth.user.name}</h3>
             <h6 className="font-weight-normal mb-0 lh-base">
-              All systems are running smoothly! You have <span className="text-primary">3 unread alerts!</span>
+              Explore Beautiful Wedding Moments, Captured and Shared with a <span className='text-primary'>Joy of Love!</span>
             </h6>
           </div>
         </div>
